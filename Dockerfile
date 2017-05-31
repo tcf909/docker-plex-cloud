@@ -4,7 +4,7 @@ MAINTAINER T.C. Ferguson <tcf909@gmail.com>
 CMD ["/sbin/my_init"]
 
 ARG DEBIAN_FRONTEND="noninteractive"
-ENV TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
+ENV TERM="xterm-color" LANG="C.UTF-8" LC_ALL="C.UTF-8"
 
 #iTerm2 Utils
 RUN curl -L https://iterm2.com/misc/install_shell_integration_and_utilities.sh | bash
