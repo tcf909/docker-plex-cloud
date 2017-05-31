@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+[[ "${DEBUG,,}" == "true" ]] && set -x
+
+FUNCTIONS="/scripts/functions.inc.sh"
+
+[[ -z "${PLEX_ADVERTISE_DNS}" ]] && sv stop plex_advertise_dns_update
+
+[[ -f ${FUNCTIONS} ]] && . ${FUNCTIONS} || { echo "ERROR: couldn't include ${FUNCTIONS}" && exit 1; }
+
+while [[ true ]]; do
+
+    sleep 60
+
+    NEEDS_UPDATING=false
+
+    dnsToIp "${PLEX_ADVERTISE_DNS}"
+
+    [[ -z "${dnsToIpResult}" ]] && continue
+
+    IFS=',' read -ra ENTRIES <<< "$(getPref "customConnections")"
+
+    for NEW_ENTRY in "${dnsToIpResult[@]}"; do
+
+        for ENTRY in "${ENTRIES[@]}"; do
+
+            [[ "${ENTRY}" == "${NEW_ENTRY}" ]] && continue 2
+
+        done
+
+        NEEDS_UPDATING=true && break
+
+    done
+
+    if [[ "${NEEDS_UPDATING}" == "true" ]]; then
+
+        NEW_ENTRY_STRING=
+
+        for NEW_ENTRY in "${dnsToIpResult[@]}"; do
+
+             [[ -n "${NEW_ENTRY_STRING}" ]] && NEW_ENTRY_STRING="${NEW_ENTRY_STRING},"
+
+             NEW_ENTRY_STRING="${NEW_ENTRY_STRING}${NEW_ENTRY}"
+
+        done
+
+        updatePref "customConnections" "${NEW_ENTRY_STRING}"
+
+    fi
+
+done

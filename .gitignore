@@ -1,0 +1,3 @@
+/rootfs/etc/rclone/
+/TEST.env
+/docker_run_example.sh

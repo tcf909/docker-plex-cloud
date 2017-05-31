@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+[[ "${DEBUG,,}" == "true" ]] && set -x
+
+#WATCHER_PATH_0,1,2,3,4,...(/source/dir|||rsync -vq $FILE rsync://whatever/whaterver)
+
+PREFIX="WATCHER"
+NOUN="PATH"
+SERVICES_DIR="/etc/service"
+
+[[ -z "$(eval "echo \$${PREFIX}_${NOUN}_0")" ]] && exit 0
+
+if [ true ]; then
+
+    COUNT=0
+    while [[ true ]]; do
+
+        #########################
+        ## START STANDARD LOOP ##
+        #########################
+        MOUNT=$(eval "echo \$${PREFIX}_${NOUN}_$COUNT")
+        MOUNT_NAME="\$${PREFIX}_${NOUN}_$COUNT"
+        OPTIONS="$(eval "echo \"\$${PREFIX}_${NOUN}_${COUNT}_OPTIONS\"")"
+        #DEFAULT_OPTIONS=$(eval "echo \$${PREFIX}_DEFAULT_OPTIONS")
+
+        #Increment count here so continue cmds later on don't cause infinite loop
+        ((COUNT++))
+
+        [[ -z "${MOUNT}" ]] && break
+
+        IFS=$'\n' read -rd '' DIR CMD <<< "$(echo "${MOUNT//'|||'/$'\n'}")"
+
+        [[ -z "${DIR}" ]] && echo "Missing \$DIR. Skipping." && continue
+
+        [[ -z "${CMD}" ]] && echo "Missing \$CMD. Skipping." && continue
+
+        #[[ -z "$OPTIONS" ]] && OPTIONS="${DEFAULT_OPTIONS}"
+
+        SERVICE=${MOUNT_NAME:1}
+        SERVICE_DIR=${SERVICES_DIR}/${SERVICE}
+
+        mkdir -p ${SERVICE_DIR}
+
+        cat << EOF > ${SERVICE_DIR}/run
+#!/usr/bin/env bash
+[[ "${DEBUG}" == "true" ]] && set -x
+
+[[ ! -e ${DIR} ]] && echo "(${DIR}) does not exist. Skipping." && exit 1
+
+WATCHER_OPTIONS="${OPTIONS}" /scripts/watcher.sh "${DIR}" '${CMD}'
+
+EOF
+        chmod +x ${SERVICE_DIR}/run
+
+    done
+
+fi
+

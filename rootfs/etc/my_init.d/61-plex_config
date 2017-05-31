@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+[[ "${DEBUG,,}" == "true" ]] && set -x
+
+#ENVS SUPPORTED:
+# PLEX_APP_SUPPORT_DIR
+# PLEX_ADVERTISE_DNS
+# PLEX_USERNAME
+# PLEX_PASSWORD
+# PLEX_TOKEN
+
+###ENVS###
+
+###CODE###
+FUNCTIONS="/scripts/functions.inc.sh"
+[[ -f ${FUNCTIONS} ]] && . ${FUNCTIONS} || { echo "ERROR: couldn't include ${FUNCTIONS}" && exit 1; }
+
+#ADVERTISE_DNS
+if [[ ! -z "${PLEX_ADVERTISE_DNS}" ]]; then
+
+    dnsToIp "${PLEX_ADVERTISE_DNS}" && \
+        [[ ! -z "${dnsToIpResult}" ]] && \
+        setPref "customConnections" "${dnsToIpResult}"
+
+fi
+
+#Stop if not first run
+[[ "${FIRST_RUN}" == "true" ]] && exit 0
+
+#GENERAL PREFERENCES
+setPref "AcceptedEULA" "1"
+setPref "PublishServerOnPlexOnlineKey" "1"
+
+#PLEX_TOKEN
+if [ -z "${PLEX_EXISTING_TOKEN}" ] && [ -z "${PLEX_CLAIM}" ]; then
+
+    if [ -n "${PLEX_TOKEN}" ]; then
+
+      setPref "PlexOnlineToken" "${PLEX_TOKEN}"
+
+    elif [[ ! -z "${PLEX_USERNAME}" ]] && [[ ! -z "${PLEX_PASSWORD}" ]]; then
+
+        PLEX_TOKEN=$(curl -u "${PLEX_USERNAME}":"${PLEX_PASSWORD}" 'https://plex.tv/users/sign_in.xml' \
+        -X POST -H 'X-Plex-Device-Name: PlexMediaServer' \
+        -H 'X-Plex-Provides: server' \
+        -H 'X-Plex-Version: 0.9' \
+        -H 'X-Plex-Platform-Version: 0.9' \
+        -H 'X-Plex-Platform: xcid' \
+        -H 'X-Plex-Product: Plex Media Server'\
+        -H 'X-Plex-Device: Linux'\
+        -H 'X-Plex-Client-Identifier: XXXX' --compressed | sed -n 's/.*<authentication-token>\(.*\)<\/authentication-token>.*/\1/p')
+
+        [[ -n "${PLEX_TOKEN}" ]] && setPref "PlexOnlineToken" "${PLEX_TOKEN}" || echo "Was not able to retrieve PLEX_TOKEN."
+
+    fi
+
+fi
