@@ -41,11 +41,7 @@ RUN \
     apt-get install \
         wget && \
     if [ "${DEBUG}" = "true" ]; then \
-        apt-get update && \
-        apt-get install vim iptables net-tools iputils-ping mtr && \
-        apt-get autoremove && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
+        apt-get install vim iptables net-tools iputils-ping mtr; \
     fi && \
     #CURL
     apt-get purge curl || echo 'no curl ' && \
@@ -73,10 +69,8 @@ RUN \
 #
 # Google-drive-ocamlfuse
 #
-    #rm /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
-    #ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
 #    add-apt-repository -y ppa:alessandro-strada/ppa && \
-#    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
+##    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
 #    apt-get update && \
 #    apt-get install google-drive-ocamlfuse && \
 ##
@@ -92,15 +86,6 @@ RUN \
     opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19 && \
     opam depext google-drive-ocamlfuse && \
     opam install google-drive-ocamlfuse && \
-    #apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config && \
-    #opam init --comp 4.04.1 -a && \
-    #eval `opam config env` && \
-    #opam update -y && \
-    #opam upgrade -y && \
-    #opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse#beta && \
-    #opam install depext && \
-    #opam depext google-drive-ocamlfuse && \
-    #opam install google-drive-ocamlfuse && \
 #
 #MERGERFS
     apt-get install \
@@ -144,7 +129,7 @@ RUN \
 #
 #CLEANUP
 #
-   apt-get remove build-essential pkg-config && \
+   #apt-get remove build-essential pkg-config && \
    apt-get autoremove && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
