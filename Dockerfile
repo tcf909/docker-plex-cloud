@@ -58,6 +58,13 @@ RUN \
     mv ${RCLONE_BUILD_DIR}/rclone/rclone /usr/local/bin/ && \
     rm -rf ${RCLONE_BUILD_DIR}/rclone && \
 #
+# Google-drive-ocamlfuse
+#
+    add-apt-repository -y ppa:alessandro-strada/ppa && \
+    apt-get update && \
+    apt-get install google-drive-ocamlfuse && \
+
+#
 #MERGERFS
     apt-get install \
         curl \
