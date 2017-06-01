@@ -3,9 +3,11 @@
 
 ##ENVS###
 
-
 ##CODE### ALWAYS
 ulimit -s unlimited
+
+#OPAM
+. /usr/local/share/opam/opam-init/init.sh > /dev/null 2> /dev/null || true
 
 ###CODE###
 STARTUP_FUNCTIONS="/scripts/functions.inc.sh"

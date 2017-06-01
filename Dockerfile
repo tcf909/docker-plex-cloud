@@ -31,6 +31,8 @@ ARG TAG=plexpass
 ARG URL=
 HEALTHCHECK --interval=200s --timeout=100s CMD /scripts/healthcheck.sh || exit 1
 
+ENV OPAMROOT="/usr/local/share/opam"
+
 ##RUN
 RUN \
     apt-get update && \
@@ -85,7 +87,7 @@ RUN \
     eval `opam config env` && \
     opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19 && \
     opam depext google-drive-ocamlfuse && \
-    opam install google-drive-ocamlfuse && \
+    opam install google-drive-ocamlfuse --destdir /usr/local/bin && \
 #
 #MERGERFS
     apt-get install \
