@@ -87,7 +87,7 @@ RUN \
     eval `opam config env` && \
     opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19 && \
     opam depext google-drive-ocamlfuse && \
-    opam install google-drive-ocamlfuse --destdir /usr/local/bin && \
+    opam install google-drive-ocamlfuse && \
 #
 #MERGERFS
     apt-get install \
