@@ -73,8 +73,8 @@ RUN \
 #
 # Google-drive-ocamlfuse
 #
-    rm /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
-    ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
+    #rm /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
+    #ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
 #    add-apt-repository -y ppa:alessandro-strada/ppa && \
     add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
     apt-get update && \
