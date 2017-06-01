@@ -76,10 +76,22 @@ RUN \
     #rm /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
     #ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
 #    add-apt-repository -y ppa:alessandro-strada/ppa && \
-    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
-    apt-get update && \
-    apt-get install google-drive-ocamlfuse && \
+#    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
+#    apt-get update && \
+#    apt-get install google-drive-ocamlfuse && \
 ##
+    apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config git && \
+    groupadd fuse && \
+    adduser root fuse && \
+    #chown root.fuse /dev/fuse && \
+    #chmod 660 /dev/fuse && \
+    opam init && \
+    opam update && \
+    opam install depext && \
+    eval `opam config env` && \
+    opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19 && \
+    opam depext google-drive-ocamlfuse && \
+    opam install google-drive-ocamlfuse && \
     #apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config && \
     #opam init --comp 4.04.1 -a && \
     #eval `opam config env` && \
