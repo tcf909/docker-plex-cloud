@@ -132,7 +132,7 @@ RUN \
 #
 #CLEANUP
 #
-   apt-get remove build-essentials pkg-config && \
+   apt-get remove build-essential pkg-config && \
    apt-get autoremove && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
