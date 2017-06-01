@@ -14,7 +14,7 @@ RUN printf 'APT::Get::Assume-Yes "true";\nAPT::Install-Recommends "false";\nAPT:
 
 ##RCLONE
 ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.36-linux-amd64.zip
-ARG RCLONE_BUILD_DIR=/usr/local/src
+ARG RCLONE_BUILD_DIR=/tmp
 
 ##MERGERFS
 ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.19.0/mergerfs_2.19.0.ubuntu-xenial_amd64.deb
@@ -38,6 +38,8 @@ RUN \
 #
 #GENERAL
 #
+    apt-get install \
+        wget && \
     if [ "${DEBUG}" = "true" ]; then \
         apt-get update && \
         apt-get install vim iptables net-tools iputils-ping mtr && \
@@ -45,31 +47,53 @@ RUN \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
     fi && \
+    #CURL
+    apt-get purge curl || echo 'no curl ' && \
+    apt-get install build-essential && \
+    wget -q 'https://curl.haxx.se/download/curl-7.54.0.tar.gz' -O /tmp/curl.tar.gz && \
+    apt-get install libssl-dev && \
+    cd /tmp && \
+    tar zxvf curl.tar.gz && \
+    cd curl-* && \
+    ./configure --libdir=/usr/lib/x86_64-linux-gnu && \
+    make && \
+    make install && \
 #
 #RCLONE
 #
     apt-get install \
-        wget \
         unzip \
         fuse && \
     cd ${RCLONE_BUILD_DIR} && \
-    wget -q $RCLONE_URL -O rclone.zip && \
+    wget -q ${RCLONE_URL} -O rclone.zip && \
     unzip -j rclone.zip -d rclone && \
     mv ${RCLONE_BUILD_DIR}/rclone/rclone /usr/local/bin/ && \
     rm -rf ${RCLONE_BUILD_DIR}/rclone && \
+    cd ~ && \
 #
 # Google-drive-ocamlfuse
 #
-    add-apt-repository -y ppa:alessandro-strada/ppa && \
+    rm /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
+    ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.4.0 && \
+#    add-apt-repository -y ppa:alessandro-strada/ppa && \
+    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
     apt-get update && \
     apt-get install google-drive-ocamlfuse && \
-
+##
+    #apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config && \
+    #opam init --comp 4.04.1 -a && \
+    #eval `opam config env` && \
+    #opam update -y && \
+    #opam upgrade -y && \
+    #opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse#beta && \
+    #opam install depext && \
+    #opam depext google-drive-ocamlfuse && \
+    #opam install google-drive-ocamlfuse && \
 #
 #MERGERFS
     apt-get install \
-        curl \
         fuse && \
-    curl -L -o /tmp/mergerfs.deb ${MERGERFS_URL} && \
+    wget -q ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
     apt-get install /tmp/mergerfs.deb && \
 #
 #RSYNC
@@ -85,8 +109,8 @@ RUN \
 #
     apt-get install openjdk-8-jre libmediainfo0v5 && \
     mkdir -p /tmp/filebot && cd /tmp/filebot && \
-    curl -o filebot-amd64.deb -L 'http://filebot.sourceforge.net/download.php?type=deb&arch=amd64' && \
-    dpkg --force-depends -i filebot-*.deb && \
+    wget -q 'http://filebot.sourceforge.net/download.php?type=deb&arch=amd64' -O /tmp/filebot-amd64.deb  && \
+    dpkg --force-depends -i /tmp/filebot-*.deb && \
     cd ~ && \
 #
 #PLEX
@@ -94,7 +118,7 @@ RUN \
     #packages
     apt-get install \
         tzdata \
-        curl \
+        #curl \
         xmlstarlet \
         uuid-runtime && \
     #Add Users
@@ -108,6 +132,7 @@ RUN \
 #
 #CLEANUP
 #
+   apt-get remove build-essentials pkg-config && \
    apt-get autoremove && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
