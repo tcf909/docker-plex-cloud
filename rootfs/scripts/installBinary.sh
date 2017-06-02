@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 . /scripts/plex-common.sh
 
 echo "${TAG}" > /version.txt

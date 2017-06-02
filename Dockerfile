@@ -1,9 +1,13 @@
 FROM tcf909/ubuntu-slim:latest
 MAINTAINER T.C. Ferguson <tcf909@gmail.com>
 
+#
+# General
+#
+ARG DEBIAN_FRONTEND="noninteractive"
+
 CMD ["/sbin/my_init"]
 
-ARG DEBIAN_FRONTEND="noninteractive"
 ENV TERM="xterm-color" LANG="C.UTF-8" LC_ALL="C.UTF-8"
 
 #iTerm2 Utils
@@ -12,34 +16,8 @@ RUN curl -L https://iterm2.com/misc/install_shell_integration_and_utilities.sh |
 #Turn off apt-get recommends and suggestions
 RUN printf 'APT::Get::Assume-Yes "true";\nAPT::Install-Recommends "false";\nAPT::Get::Install-Suggests "false";\n' > /etc/apt/apt.conf.d/99defaults
 
-##RCLONE
-ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.36-linux-amd64.zip
-ARG RCLONE_BUILD_DIR=/tmp
-
-##MERGERFS
-ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.19.0/mergerfs_2.19.0.ubuntu-xenial_amd64.deb
-
-##RSYNC
-EXPOSE 873
-
-###PLEX
-EXPOSE 32400/tcp 3005/tcp 8324/tcp 32469/tcp 1900/udp 32410/udp 32412/udp 32413/udp 32414/udp
-VOLUME /config /transcode
-ENV CHANGE_CONFIG_DIR_OWNERSHIP="true" \
-    HOME="/config"
-ARG TAG="1.5.1.3520-ed60c70d6"
-ARG URL=
-HEALTHCHECK --interval=200s --timeout=100s CMD /scripts/healthcheck.sh || exit 1
-
-ENV OPAMROOT="/usr/local/share/opam"
-
-##RUN
-RUN \
-    apt-get update && \
+RUN apt-get update && \
     apt-get upgrade && \
-#
-#GENERAL
-#
     apt-get install \
         wget && \
     if [ "${DEBUG}" = "true" ]; then \
@@ -56,18 +34,12 @@ RUN \
     ./configure --libdir=/usr/lib/x86_64-linux-gnu && \
     make && \
     make install && \
-#
-#RCLONE
-#
-    apt-get install \
-        unzip \
-        fuse && \
-    cd ${RCLONE_BUILD_DIR} && \
-    wget -q ${RCLONE_URL} -O rclone.zip && \
-    unzip -j rclone.zip -d rclone && \
-    mv ${RCLONE_BUILD_DIR}/rclone/rclone /usr/local/bin/ && \
-    rm -rf ${RCLONE_BUILD_DIR}/rclone && \
     cd ~ && \
+#cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 #
 # Google-drive-ocamlfuse
 #
@@ -76,6 +48,11 @@ RUN \
 #    apt-get update && \
 #    apt-get install google-drive-ocamlfuse && \
 ##
+ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19"
+
+ENV OPAMROOT="/usr/local/share/opam"
+
+RUN apt-get update && \
     apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config git && \
     groupadd fuse && \
     adduser root fuse && \
@@ -85,39 +62,104 @@ RUN \
     opam update && \
     opam install depext && \
     eval `opam config env` && \
-    opam pin -n add google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19 && \
+    opam pin -n add "${PIN_URL}" && \
     opam depext google-drive-ocamlfuse && \
     opam install google-drive-ocamlfuse && \
-#
-#MERGERFS
-    apt-get install \
-        fuse && \
-    wget -q ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
-    apt-get install /tmp/mergerfs.deb && \
+#cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 #
 #RSYNC
 #
-    apt-get install rsync && \
+EXPOSE 873
+
+RUN apt-get update && \
+    apt-get install \
+        rsync && \
+    #cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 #
 #WATCHER
 #
+RUN apt-get update && \
     apt-get install \
         inotify-tools && \
+    #cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 #
 #FILEBOT
 #
-    apt-get install openjdk-8-jre libmediainfo0v5 && \
-    mkdir -p /tmp/filebot && cd /tmp/filebot && \
+RUN apt-get update && \
+    apt-get install \
+        wget \
+        openjdk-8-jre \
+        libmediainfo0v5 && \
     wget -q 'http://filebot.sourceforge.net/download.php?type=deb&arch=amd64' -O /tmp/filebot-amd64.deb  && \
     dpkg --force-depends -i /tmp/filebot-*.deb && \
+    #cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#
+# RCLONE
+#
+ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.36-linux-amd64.zip
+
+RUN apt-get update && \
+    apt-get install \
+        unzip \
+        fuse && \
+    cd /tmp && \
+    wget -q ${RCLONE_URL} -O rclone.zip && \
+    unzip -j rclone.zip -d rclone && \
+    mv /tmp/rclone/rclone /usr/local/bin/ && \
     cd ~ && \
+    #cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 #
-#PLEX
+#MERGERFS
 #
-    #packages
+ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.19.0/mergerfs_2.19.0.ubuntu-xenial_amd64.deb
+
+RUN apt-get update && \
+    apt-get install \
+        fuse && \
+    cd /tmp && \
+    wget -q ${MERGERFS_URL} -O mergerfs.deb && \
+    apt-get install mergerfs.deb && \
+    cd ~ && \
+    #cleanup
+    apt-get autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#
+# PLEX
+#
+HEALTHCHECK --interval=200s --timeout=100s CMD /scripts/healthcheck.sh || exit 1
+
+EXPOSE 32400/tcp 3005/tcp 8324/tcp 32469/tcp 1900/udp 32410/udp 32412/udp 32413/udp 32414/udp
+
+VOLUME /config /transcode
+
+ENV CHANGE_CONFIG_DIR_OWNERSHIP="true" \
+    HOME="/config"
+
+RUN apt-get update && \
     apt-get install \
         tzdata \
-        #curl \
         xmlstarlet \
         uuid-runtime && \
     #Add Users
@@ -128,16 +170,19 @@ RUN \
         /config \
         /transcode \
         /data && \
-#
-#CLEANUP
-#
-   #apt-get remove build-essential pkg-config && \
+   #cleanup
    apt-get autoremove && \
    apt-get clean && \
    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+#FileSystem
 COPY rootfs/ /
 
+#
+# Plex Post Build
+#
+ARG TAG="1.5.1.3520-ed60c70d6"
+ARG URL="https://downloads.plex.tv/plex-media-server/1.5.1.3520-ed60c70d6/plexmediaserver_1.5.1.3520-ed60c70d6_amd64.deb"
 RUN \
     #install plex
     /scripts/installBinary.sh
