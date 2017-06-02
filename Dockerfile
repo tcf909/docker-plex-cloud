@@ -27,7 +27,7 @@ EXPOSE 32400/tcp 3005/tcp 8324/tcp 32469/tcp 1900/udp 32410/udp 32412/udp 32413/
 VOLUME /config /transcode
 ENV CHANGE_CONFIG_DIR_OWNERSHIP="true" \
     HOME="/config"
-ARG TAG=plexpass
+ARG TAG="1.5.1.3520-ed60c70d6"
 ARG URL=
 HEALTHCHECK --interval=200s --timeout=100s CMD /scripts/healthcheck.sh || exit 1
 
