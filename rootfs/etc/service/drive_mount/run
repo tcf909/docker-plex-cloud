@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+[[ "${DEBUG,,}" == "true" ]] && set -x
+
+FUNCTIONS="/scripts/functions.inc.sh"
+
+. /usr/local/share/opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+
+nice -n -10 google-drive-ocamlfuse -headless -verbose -label FTIO -o allow_other -f /data/.Drive &
+
+PID=$!
+
+sv restart RCLONE_MOUNT_0
+
+wait ${PID}
+
+umount /data/.Drive || umount -l /data/.Drive
