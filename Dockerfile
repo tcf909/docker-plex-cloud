@@ -62,7 +62,7 @@ RUN apt-get update && \
     opam update && \
     opam install depext && \
     eval `opam config env` && \
-    opam pin -n add "${PIN_URL}" && \
+    opam pin -n add ${PIN_URL} && \
     opam depext google-drive-ocamlfuse && \
     opam install google-drive-ocamlfuse && \
 #cleanup
@@ -137,8 +137,8 @@ RUN apt-get update && \
     apt-get install \
         fuse && \
     cd /tmp && \
-    wget -q ${MERGERFS_URL} -O mergerfs.deb && \
-    apt-get install mergerfs.deb && \
+    wget -q ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
+    apt-get install /tmp/mergerfs.deb && \
     cd ~ && \
     #cleanup
     apt-get autoremove && \
