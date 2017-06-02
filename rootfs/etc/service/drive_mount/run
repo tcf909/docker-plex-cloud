@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 [[ "${DEBUG,,}" == "true" ]] && set -x
 
+export HOME=/config
+
 FUNCTIONS="/scripts/functions.inc.sh"
 
 . /usr/local/share/opam/opam-init/init.sh > /dev/null 2> /dev/null || true
