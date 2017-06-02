@@ -11,6 +11,8 @@ nice -n -10 google-drive-ocamlfuse -headless -verbose -label FTIO -o allow_other
 
 PID=$!
 
+sleep 5
+
 sv restart RCLONE_MOUNT_0
 
 wait ${PID}
