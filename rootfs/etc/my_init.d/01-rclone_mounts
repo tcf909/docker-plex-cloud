@@ -16,6 +16,8 @@ PREFIX="RCLONE"
 SERVICES_DIR="/etc/service"
 
 ###CODE###
+mkdir -p /etc/rclone
+ln -s /data/rclone.conf /etc/rclone/rclone.conf
 
 #Don't continue if mounts are not setup
 [[ -z $(eval "echo \$${PREFIX}_MOUNT_0") ]] && exit 0
