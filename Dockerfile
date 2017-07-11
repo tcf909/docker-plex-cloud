@@ -118,7 +118,7 @@ RUN apt-get update && \
 #
 #MERGERFS
 #
-ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.19.0/mergerfs_2.19.0.ubuntu-xenial_amd64.deb
+ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.23.0/mergerfs_2.23.0.ubuntu-xenial_amd64.deb
 
 RUN apt-get update && \
     apt-get install \
