@@ -35,7 +35,7 @@ RUN apt-get update && \
 #    apt-get update && \
 #    apt-get install google-drive-ocamlfuse && \
 ##
-ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19"
+ARG cd /co="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19"
 
 ENV OPAMROOT="/usr/local/share/opam"
 
@@ -150,7 +150,7 @@ RUN apt-get update && \
         xmlstarlet \
         uuid-runtime && \
     #Add Users
-    useradd -U -d /config -s /bin/false plex && \
+    useradd -g 0 -o -u 0 -d /config -s /bin/false plex && \
     usermod -G users plex && \
     # Setup directories
     mkdir -p \
