@@ -35,7 +35,7 @@ RUN apt-get update && \
 #    apt-get update && \
 #    apt-get install google-drive-ocamlfuse && \
 ##
-ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.19"
+ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.20"
 
 ENV OPAMROOT="/usr/local/share/opam"
 
