@@ -4,22 +4,9 @@ MAINTAINER T.C. Ferguson <tcf909@gmail.com>
 #
 # General
 #
-ARG DEBIAN_FRONTEND="noninteractive"
-
-CMD ["/sbin/my_init"]
-
-ENV TERM="xterm-color" LANG="C.UTF-8" LC_ALL="C.UTF-8"
-
-#iTerm2 Utils
-RUN curl -L https://iterm2.com/misc/install_shell_integration_and_utilities.sh | bash
-
-#Turn off apt-get recommends and suggestions
-RUN printf 'APT::Get::Assume-Yes "true";\nAPT::Install-Recommends "false";\nAPT::Get::Install-Suggests "false";\n' > /etc/apt/apt.conf.d/99defaults
 
 RUN apt-get update && \
     apt-get upgrade && \
-    apt-get install \
-        wget && \
     if [ "${DEBUG}" = "true" ]; then \
         apt-get install vim iptables net-tools iputils-ping mtr; \
     fi && \
