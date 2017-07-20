@@ -63,7 +63,7 @@ while ! CHECK_SPACE; do
 
     LOG "Free % (${FREE_PERCENT}) below concern % (${STAGE_1_PERCENT}). Working to free up space..."
 
-    mapfile -t FILES <<< "$(find "${SOURCE_DIR}" -type f -printf "%T+ %p\n" | grep -v "/data/.Local/Incoming" | sort | cut -d' ' -f2-)"
+    mapfile -t FILES <<< "$(find "${SOURCE_DIR}" -type f -printf "%T+ %p\n" | grep -v "/data/.Local/Incoming" | grep -v ".tmp" | sort | cut -d' ' -f2-)"
 
     [[ -z "${FILES[@]-}" ]] && LOG "No files found. Exiting." && break;
 
