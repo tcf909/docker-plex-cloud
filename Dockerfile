@@ -35,7 +35,7 @@ RUN apt-get update && \
 #    apt-get update && \
 #    apt-get install google-drive-ocamlfuse && \
 ##
-ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.20"
+ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.24"
 
 ENV OPAMROOT="/usr/local/share/opam"
 
@@ -99,7 +99,7 @@ RUN apt-get update && \
 #
 # RCLONE
 #
-ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.36-linux-amd64.zip
+ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.39-linux-amd64.zip
 
 RUN apt-get update && \
     apt-get install \
@@ -118,7 +118,7 @@ RUN apt-get update && \
 #
 #MERGERFS
 #
-ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.23.0/mergerfs_2.23.0.ubuntu-xenial_amd64.deb
+ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.23.1/mergerfs_2.23.1.ubuntu-xenial_amd64.deb
 
 RUN apt-get update && \
     apt-get install \
