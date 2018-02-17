@@ -141,8 +141,8 @@ EXPOSE 32400/tcp 3005/tcp 8324/tcp 32469/tcp 1900/udp 32410/udp 32412/udp 32413/
 
 VOLUME /config /transcode
 
-ENV CHANGE_CONFIG_DIR_OWNERSHIP="true" \
-    HOME="/config"
+ENV PLEX_CHANGE_CONFIG_DIR_OWNERSHIP="true" \
+    PLEX_HOME_DIR="/config"
 
 RUN apt-get update && \
     apt-get install \
@@ -168,8 +168,12 @@ COPY rootfs/ /
 #
 # Plex Post Build
 #
-ARG TAG="1.5.1.3520-ed60c70d6"
-ARG URL="https://downloads.plex.tv/plex-media-server/1.5.1.3520-ed60c70d6/plexmediaserver_1.5.1.3520-ed60c70d6_amd64.deb"
+#1.10.1
+ARG TAG="1.10.1.4602-f54242b6b"
+ARG URL="https://downloads.plex.tv/plex-media-server/1.10.1.4602-f54242b6b/plexmediaserver_1.10.1.4602-f54242b6b_amd64.deb"
+#1.5.1 (working audio transcode)
+#ARG TAG="1.5.1.3520-ed60c70d6"
+#ARG URL="https://downloads.plex.tv/plex-media-server/1.5.1.3520-ed60c70d6/plexmediaserver_1.5.1.3520-ed60c70d6_amd64.deb"
 RUN \
     #install plex
     /scripts/installBinary.sh

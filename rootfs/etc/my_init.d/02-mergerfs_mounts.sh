@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 [[ "${DEBUG,,}" == "true" ]] && set -x
+. "/scripts/functions.inc.sh" || { echo "ERROR: couldn't include common functions" && exit 1; }
 
 #ENVS SUPPORTED:
 # UNION_USER

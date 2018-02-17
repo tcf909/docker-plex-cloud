@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
+[[ "${DEBUG,,}" == "true" ]] && set -x
+. "/scripts/functions.inc.sh" || { echo "ERROR: couldn't include common functions" && exit 1; }
 
-# If we are debugging, enable trace
-if [ "${DEBUG,,}" = "true" ]; then
-  set -x
-fi
+# If the first run completed successfully, we are done
+[[ "${FIRST_RUN}" == "true" ]] && exit 0
 
-. /scripts/plex-common.sh
-
-function getPref {
-  local key="$1"
-
-  xmlstarlet sel -T -t -m "/Preferences" -v "@${key}" -n "${prefFile}"
-}
+#load plex common functions
+. "/scripts/plex-common.sh" || { echo "ERROR: unable to load plex common scripts." && exit 1; }
 
 # Get token
-[ -f /etc/default/plexmediaserver ] && . /etc/default/plexmediaserver
-pmsApplicationSupportDir="${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR:-${HOME}/Library/Application Support}"
-prefFile="${pmsApplicationSupportDir}/Plex Media Server/Preferences.xml"
-token="$(getPref "PlexOnlineToken")"
+PLEX_EXISTING_TOKEN="$(getPref "PlexOnlineToken")"
 
 # Determine current version
 if (dpkg --get-selections plexmediaserver 2> /dev/null | grep -wq "install"); then
@@ -39,7 +31,7 @@ if [ "${versionToInstall}" = "${installedVersion}" ]; then
 fi
 
 # Get updated version number
-getVersionInfo "${versionToInstall}" "${token}" remoteVersion remoteFile
+getVersionInfo "${versionToInstall}" "${PLEX_EXISTING_TOKEN}" remoteVersion remoteFile
 
 if [ -z "${remoteVersion}" ] || [ -z "${remoteFile}" ]; then
   echo "Could not get update version"

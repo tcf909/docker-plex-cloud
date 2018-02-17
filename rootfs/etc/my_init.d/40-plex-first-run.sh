@@ -1,38 +1,12 @@
 #!/usr/bin/env bash
-
-# If we are debugging, enable trace
-if [ "${DEBUG,,}" = "true" ]; then
-  set -x
-fi
+[[ "${DEBUG,,}" == "true" ]] && set -x
+. "/scripts/functions.inc.sh" || { echo "ERROR: couldn't include common functions" && exit 1; }
 
 # If the first run completed successfully, we are done
-if [ -e /.firstRunComplete ]; then
-  exit 0
-fi
+[[ "${FIRST_RUN}" == "true" ]] && exit 0
 
-function getPref {
-  local key="$1"
-  
-  xmlstarlet sel -T -t -m "/Preferences" -v "@${key}" -n "${prefFile}"
-}
-
-function setPref {
-  local key="$1"
-  local value="$2"
-  
-  count="$(xmlstarlet sel -t -v "count(/Preferences/@${key})" "${prefFile}")"
-  count=$(($count + 0))
-  if [[ $count > 0 ]]; then
-    xmlstarlet ed --inplace --update "/Preferences/@${key}" -v "${value}" "${prefFile}"
-  else
-    xmlstarlet ed --inplace --insert "/Preferences"  --type attr -n "${key}" -v "${value}" "${prefFile}"
-  fi
-}
-
-home="$(echo ~plex)"
-[ -f /etc/default/plexmediaserver ] && . /etc/default/plexmediaserver
-pmsApplicationSupportDir="${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR:-${home}/Library/Application Support}"
-prefFile="${pmsApplicationSupportDir}/Plex Media Server/Preferences.xml"
+#load plex common functions
+. "/scripts/plex-common.sh" || { echo "ERROR: unable to load plex common scripts." && exit 1; }
 
 # Setup user/group ids
 if [ ! -z "${PLEX_UID}" ]; then
@@ -64,9 +38,9 @@ if [ ! -z "${PLEX_GID}" ]; then
 fi
 
 # Update ownership of dirs we need to write
-if [ "${CHANGE_CONFIG_DIR_OWNERSHIP,,}" = "true" ]; then
-  if [ -f "${prefFile}" ]; then
-    if [ ! "$(stat -c %u "${prefFile}")" = "$(id -u plex)" ]; then
+if [ "${PLEX_CHANGE_CONFIG_DIR_OWNERSHIP,,}" = "true" ]; then
+  if [ -f "${PLEX_PREF_FILE}" ]; then
+    if [ ! "$(stat -c %u "${PLEX_PREF_FILE}")" = "$(id -u plex)" ]; then
       chown -R plex:plex /config
     fi
   else
@@ -76,14 +50,14 @@ if [ "${CHANGE_CONFIG_DIR_OWNERSHIP,,}" = "true" ]; then
 fi
 
 # Create empty shell pref file if it doesn't exist already
-if [ ! -e "${prefFile}" ]; then
+if [ ! -e "${PLEX_PREF_FILE}" ]; then
   echo "Creating pref shell"
-  mkdir -p "$(dirname "${prefFile}")"
-  cat > "${prefFile}" <<-EOF
+  mkdir -p "$(dirname "${PLEX_PREF_FILE}")"
+  cat > "${PLEX_PREF_FILE}" <<-EOF
 <?xml version="1.0" encoding="utf-8"?>
 <Preferences/>
 EOF
-  chown -R plex:plex "$(dirname "${prefFile}")"
+  chown -R plex:plex "$(dirname "${PLEX_PREF_FILE}")"
 fi
 
 # Setup Server's client identifier
@@ -92,36 +66,80 @@ if [ -z "${serial}" ]; then
   serial="$(uuidgen)"
   setPref "MachineIdentifier" "${serial}"
 fi
+
 clientId="$(getPref "ProcessedMachineIdentifier")"
 if [ -z "${clientId}" ]; then
   clientId="$(echo -n "${serial}- Plex Media Server" | sha1sum | cut -b 1-40)"
   setPref "ProcessedMachineIdentifier" "${clientId}"
 fi
 
+#GENERAL PREFERENCES
+setPref "AcceptedEULA" "1"
+setPref "PublishServerOnPlexOnlineKey" "1"
+
 # Get server token and only turn claim token into server token if we have former but not latter.
-token="$(getPref "PlexOnlineToken")"
-if [ ! -z "${PLEX_CLAIM}" ] && [ -z "${token}" ]; then
-  echo "Attempting to obtain server token from claim token"
-  loginInfo="$(curl -X POST \
-        -H 'X-Plex-Client-Identifier: '${clientId} \
-        -H 'X-Plex-Product: Plex Media Server'\
-        -H 'X-Plex-Version: 1.1' \
-        -H 'X-Plex-Provides: server' \
-        -H 'X-Plex-Platform: Linux' \
-        -H 'X-Plex-Platform-Version: 1.0' \
-        -H 'X-Plex-Device-Name: PlexMediaServer' \
-        -H 'X-Plex-Device: Linux' \
-        "https://plex.tv/api/claim/exchange?token=${PLEX_CLAIM}")"
-  token="$(echo "$loginInfo" | sed -n 's/.*<authentication-token>\(.*\)<\/authentication-token>.*/\1/p')"
-  
-  if [ "$token" ]; then
-    echo "Token obtained successfully"
-    setPref "PlexOnlineToken" "${token}"
-  fi
+PLEX_EXISTING_TOKEN="$(getPref "PlexOnlineToken")"
+
+#PLEX_TOKEN
+if [[ -z "${PLEX_EXISTING_TOKEN}" ]]; then
+
+    if [ -n "${PLEX_TOKEN}" ]; then
+
+        PLEX_EXISTING_TOKEN="${PLEX_TOKEN}"
+
+        setPref "PlexOnlineToken" "${PLEX_TOKEN}"
+
+    fi
+
+    if [[ -z "${PLEX_EXISTING_TOKEN}" ]] && [[ -n "${PLEX_CLAIM}" ]]; then
+
+        loginInfo="$(curl -X POST \
+            -H 'X-Plex-Client-Identifier: '${clientId} \
+            -H 'X-Plex-Product: Plex Media Server'\
+            -H 'X-Plex-Version: 1.1' \
+            -H 'X-Plex-Provides: server' \
+            -H 'X-Plex-Platform: Linux' \
+            -H 'X-Plex-Platform-Version: 1.0' \
+            -H 'X-Plex-Device-Name: PlexMediaServer' \
+            -H 'X-Plex-Device: Linux' \
+            "https://plex.tv/api/claim/exchange?token=${PLEX_CLAIM}")"
+
+        PLEX_EXISTING_TOKEN="$(echo "$loginInfo" | sed -n 's/.*<authentication-token>\(.*\)<\/authentication-token>.*/\1/p')"
+
+        [[ -n "${PLEX_EXISTING_TOKEN}" ]] && setPref "PlexOnlineToken" "${PLEX_EXISTING_TOKEN}" || echo "Was not able to retrieve PLEX_TOKEN."
+
+    fi
+
+    if [[ -z "${PLEX_EXISTING_TOKEN}" ]] && [[ -n "${PLEX_USERNAME}" ]] && [[ -n "${PLEX_PASSWORD}" ]]; then
+
+        PLEX_EXISTING_TOKEN="$(curl -u '${PLEX_USERNAME}':'${PLEX_PASSWORD}' 'https://plex.tv/users/sign_in.xml' \
+            -X POST \
+            -H 'X-Plex-Device-Name: PlexMediaServer' \
+            -H 'X-Plex-Provides: server' \
+            -H 'X-Plex-Version: 0.9' \
+            -H 'X-Plex-Platform-Version: 0.9' \
+            -H 'X-Plex-Platform: xcid' \
+            -H 'X-Plex-Product: Plex Media Server' \
+            -H 'X-Plex-Device: Linux' \
+            -H 'X-Plex-Client-Identifier: XXXX' --compressed | sed -n 's/.*<authentication-token>\(.*\)<\/authentication-token>.*/\1/p')"
+
+        [[ -n "${PLEX_EXISTING_TOKEN}" ]] && setPref "PlexOnlineToken" "${PLEX_EXISTING_TOKEN}" || echo "Was not able to retrieve PLEX_TOKEN."
+
+    fi
+
 fi
 
 if [ ! -z "${ADVERTISE_IP}" ]; then
   setPref "customConnections" "${ADVERTISE_IP}"
+fi
+
+#ADVERTISE_DNS
+if [[ ! -z "${PLEX_ADVERTISE_DNS}" ]]; then
+
+    dnsToIp "${PLEX_ADVERTISE_DNS}" && \
+        [[ ! -z "${dnsToIpResult}" ]] && \
+        setPref "customConnections" "${dnsToIpResult}"
+
 fi
 
 if [ ! -z "${ALLOWED_NETWORKS}" ]; then
@@ -132,6 +150,3 @@ fi
 if [ -z "$(getPref "TranscoderTempDirectory")" ]; then
   setPref "TranscoderTempDirectory" "/transcode"
 fi
-
-touch /.firstRunComplete
-echo "Plex Media Server first run setup complete"
