@@ -4,6 +4,14 @@ PLEX_HOME_DIR="${PLEX_HOME_DIR:-$(echo ~plex)}"
 PLEX_APP_SUPPORT_DIR="${PLEX_APP_SUPPORT_DIR:-${PLEX_HOME_DIR}/Library/Application Support}"
 PLEX_PREF_FILE="${PLEX_APP_SUPPORT_DIR}/Plex Media Server/Preferences.xml"
 
+function plexStarted {
+
+    local PS_OUTPUT="$(ps -p $(cat "${PLEX_APP_SUPPORT_DIR}/Plex Media Server/plexmediaserver.pid") -o cmd h)"
+
+    [[ "${PS_OUTPUT}" == "/usr/lib/plexmediaserver/Plex Media Server" ]] && return 0 || return 1;
+
+}
+
 function getVersionInfo {
   local version="$1"
   local token="$2"
