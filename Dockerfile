@@ -99,7 +99,7 @@ RUN apt-get update && \
 #
 # RCLONE
 #
-ARG RCLONE_URL=http://downloads.rclone.org/rclone-v1.39-linux-amd64.zip
+ARG RCLONE_URL=https://downloads.rclone.org/v1.41/rclone-v1.41-linux-amd64.zip
 
 RUN apt-get update && \
     apt-get install \
