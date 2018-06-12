@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
 [[ "${DEBUG,,}" == "true" ]] && set -x
+FUNCTIONS="/scripts/functions.inc.sh"
+CACHE_STAMP_FILE="/config/.gdfuse/FTIO/.cacheStamp"
 
 export HOME=/config
 
 cd /config
 
-FUNCTIONS="/scripts/functions.inc.sh"
-
 . /usr/local/share/opam/opam-init/init.sh > /dev/null 2> /dev/null || true
 
 umount /data/.Drive || umount -l /data/.Drive
 
+LAST_CACHE_CLEAN="$(cat ${CACHE_STAMP_FILE} 2>/dev/null)"
+
+#Clean cache every 7 days
+if [[ -z ${LAST_CACHE_CLEAN} ]] || [[ ${LAST_CACHE_CLEAN} < $(($(date +'%s') - 604800)) ]]; then
+ echo $(date +'%s') > ${CACHE_STAMP_FILE}
+ google-drive-ocamlfuse -label FTIO -o allow_other -cc
+fi
+
+#make sure to remount rclone after gdfuse is started
 sleep 5 && sv restart RCLONE_MOUNT_0 &
 
-exec nice -n -10 google-drive-ocamlfuse -verbose -label FTIO -o allow_other -f /data/.Drive
+exec nice -n -10 google-drive-ocamlfuse -label FTIO -o allow_other -f /data/.Drive

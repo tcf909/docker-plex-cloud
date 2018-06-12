@@ -168,12 +168,15 @@ COPY rootfs/ /
 #
 # Plex Post Build
 #
-#1.10.1
-ARG TAG="1.10.1.4602-f54242b6b"
-ARG URL="https://downloads.plex.tv/plex-media-server/1.10.1.4602-f54242b6b/plexmediaserver_1.10.1.4602-f54242b6b_amd64.deb"
 #1.5.1 (working audio transcode)
 #ARG TAG="1.5.1.3520-ed60c70d6"
 #ARG URL="https://downloads.plex.tv/plex-media-server/1.5.1.3520-ed60c70d6/plexmediaserver_1.5.1.3520-ed60c70d6_amd64.deb"
+#1.10.1
+#ARG TAG="1.10.1.4602-f54242b6b"
+#ARG URL="https://downloads.plex.tv/plex-media-server/1.10.1.4602-f54242b6b/plexmediaserver_1.10.1.4602-f54242b6b_amd64.deb"
+#1.13.2
+ARG TAG="1.13.2.5154-fd05be322"
+ARG URL="https://downloads.plex.tv/plex-media-server/1.13.2.5154-fd05be322/plexmediaserver_1.13.2.5154-fd05be322_amd64.deb"
 RUN \
     #install plex
     /scripts/installBinary.sh
