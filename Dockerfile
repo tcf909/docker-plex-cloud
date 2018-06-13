@@ -121,12 +121,12 @@ RUN apt-get update && \
 # 2.23.1
 #ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.23.1/mergerfs_2.23.1.ubuntu-xenial_amd64.deb
 # 2.24.2
-ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.24.2/mergerfs_2.24.2.ubuntu-xenial_arm64.deb
+ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.24.2/mergerfs_2.24.2.ubuntu-xenial_amd64.deb
 RUN apt-get update && \
     apt-get install \
         fuse && \
     cd /tmp && \
-    wget -q ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
+    wget ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
     apt-get install /tmp/mergerfs.deb && \
     cd ~ && \
     #cleanup
