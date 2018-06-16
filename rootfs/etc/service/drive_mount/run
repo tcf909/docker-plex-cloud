@@ -20,7 +20,9 @@ if [[ -z ${LAST_CACHE_CLEAN} ]] || [[ ${LAST_CACHE_CLEAN} < $(($(date +'%s') - 6
 fi
 
 LOG_FILE="/config/.gdfuse/FTIO/gdfuse.log"
+CURL_LOG_FILE="/config/.gdfuse/FTIO/curl.log"
 [[ -f ${LOG_FILE} ]] && mv "${LOG_FILE}" "${LOG_FILE}-$(date +'%s')"
+[[ -f ${CURL_LOG_FILE} ]] && mv "${CURL_LOG_FILE}" "${CURL_LOG_FILE}-$(date +'%s')"
 
 #make sure to remount rclone after gdfuse is started
 sleep 5 && sv restart RCLONE_MOUNT_0 &
