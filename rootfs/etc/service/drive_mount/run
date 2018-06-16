@@ -28,4 +28,4 @@ CURL_LOG_FILE="/config/.gdfuse/FTIO/curl.log"
 sleep 5 && sv restart RCLONE_MOUNT_0 &
 
 #exec nice -n -10 google-drive-ocamlfuse -label FTIO -o allow_other -f /data/.Drive
-exec nice -n -10 google-drive-ocamlfuse -label FTIO -debug -f -o allow_other /data/.Drive
+exec nice -n -10 google-drive-ocamlfuse -label FTIO -verbose -f -o allow_other /data/.Drive
