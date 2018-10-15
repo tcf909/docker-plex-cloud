@@ -99,7 +99,7 @@ RUN apt-get update && \
 #
 # RCLONE
 #
-ARG RCLONE_URL=https://downloads.rclone.org/v1.41/rclone-v1.41-linux-amd64.zip
+ARG RCLONE_URL=https://beta.rclone.org/v1.43-172-g83b1ae48-beta/rclone-v1.43-172-g83b1ae48-beta-linux-amd64.zip
 
 RUN apt-get update && \
     apt-get install \
@@ -177,8 +177,10 @@ COPY rootfs/ /
 #ARG TAG="1.10.1.4602-f54242b6b"
 #ARG URL="https://downloads.plex.tv/plex-media-server/1.10.1.4602-f54242b6b/plexmediaserver_1.10.1.4602-f54242b6b_amd64.deb"
 #1.13.2
-ARG TAG="1.13.2.5154-fd05be322"
-ARG URL="https://downloads.plex.tv/plex-media-server/1.13.2.5154-fd05be322/plexmediaserver_1.13.2.5154-fd05be322_amd64.deb"
+#ARG TAG="1.13.2.5154-fd05be322"
+#ARG URL="https://downloads.plex.tv/plex-media-server/1.13.2.5154-fd05be322/plexmediaserver_1.13.2.5154-fd05be322_amd64.deb"
+ARG TAG="1.13.9.5439-7303bc002"
+ARG URL="https://downloads.plex.tv/plex-media-server/1.13.9.5439-7303bc002/plexmediaserver_1.13.9.5439-7303bc002_amd64.deb"
 RUN \
     #install plex
     /scripts/installBinary.sh
