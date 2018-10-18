@@ -28,36 +28,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #
-# Google-drive-ocamlfuse
-#
-#    add-apt-repository -y ppa:alessandro-strada/ppa && \
-##    add-apt-repository ppa:alessandro-strada/google-drive-ocamlfuse-beta && \
-#    apt-get update && \
-#    apt-get install google-drive-ocamlfuse && \
-##
-ARG PIN_URL="google-drive-ocamlfuse https://github.com/astrada/google-drive-ocamlfuse.git#v0.6.25"
-
-ENV OPAMROOT="/usr/local/share/opam"
-
-RUN apt-get update && \
-    apt-get install opam ocaml make fuse camlp4-extra build-essential pkg-config git && \
-    groupadd fuse && \
-    adduser root fuse && \
-    #chown root.fuse /dev/fuse && \
-    #chmod 660 /dev/fuse && \
-    opam init && \
-    opam update && \
-    opam install depext && \
-    eval `opam config env` && \
-    opam pin -n add ${PIN_URL} && \
-    opam depext google-drive-ocamlfuse && \
-    opam install google-drive-ocamlfuse && \
-#cleanup
-    apt-get autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#
 #RSYNC
 #
 EXPOSE 873
@@ -73,28 +43,28 @@ RUN apt-get update && \
 #
 #WATCHER
 #
-RUN apt-get update && \
-    apt-get install \
-        inotify-tools && \
-    #cleanup
-    apt-get autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN apt-get update && \
+#    apt-get install \
+#        inotify-tools && \
+#    #cleanup
+#    apt-get autoremove && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #
 #FILEBOT
 #
-RUN apt-get update && \
-    apt-get install \
-        wget \
-        openjdk-8-jre \
-        libmediainfo0v5 && \
-    wget -q 'http://filebot.sourceforge.net/download.php?type=deb&arch=amd64' -O /tmp/filebot-amd64.deb  && \
-    dpkg --force-depends -i /tmp/filebot-*.deb && \
-    #cleanup
-    apt-get autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN apt-get update && \
+#    apt-get install \
+#        wget \
+#        openjdk-8-jre \
+#        libmediainfo0v5 && \
+#    wget -q 'http://filebot.sourceforge.net/download.php?type=deb&arch=amd64' -O /tmp/filebot-amd64.deb  && \
+#    dpkg --force-depends -i /tmp/filebot-*.deb && \
+#    #cleanup
+#    apt-get autoremove && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 #
 # RCLONE
@@ -115,35 +85,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#
-#MERGERFS
-#
-# 2.23.1
-#ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.23.1/mergerfs_2.23.1.ubuntu-xenial_amd64.deb
-# 2.24.2
-ARG MERGERFS_URL=https://github.com/trapexit/mergerfs/releases/download/2.24.2/mergerfs_2.24.2.ubuntu-xenial_amd64.deb
-RUN apt-get update && \
-    apt-get install \
-        fuse && \
-    cd /tmp && \
-    wget ${MERGERFS_URL} -O /tmp/mergerfs.deb && \
-    apt-get install /tmp/mergerfs.deb && \
-    cd ~ && \
-    #cleanup
-    apt-get autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#
 # PLEX
 #
-HEALTHCHECK --interval=200s --timeout=100s CMD /scripts/healthcheck.sh || exit 1
+HEALTHCHECK --interval=60s --timeout=60s CMD /scripts/healthcheck.sh || exit 1
 
 EXPOSE 32400/tcp 3005/tcp 8324/tcp 32469/tcp 1900/udp 32410/udp 32412/udp 32413/udp 32414/udp
 
 VOLUME /config /transcode
 
-ENV PLEX_CHANGE_CONFIG_DIR_OWNERSHIP="true" \
+ENV PLEX_CHANGE_CONFIG_DIR_OWNERSHIP="false" \
     PLEX_HOME_DIR="/config"
 
 RUN apt-get update && \
@@ -166,7 +116,6 @@ RUN apt-get update && \
 
 #FileSystem
 COPY rootfs/ /
-
 
 #
 # Plex Post Build
