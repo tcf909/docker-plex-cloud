@@ -87,9 +87,9 @@ EOF
 
 [[ ! -d ${MOUNT_LOCAL} ]] && exit 1
 
-chown ${RSYNC_SERVER_USER}:${RSYNC_SERVER_GROUP} -R ${MOUNT_LOCAL}
+#chown ${RSYNC_SERVER_USER}:${RSYNC_SERVER_GROUP} -R ${MOUNT_LOCAL}
 
-exec /usr/bin/rsync --no-detach --daemon --config ${RSYNC_SERVER_CONF_PATH} -v
+nice -n 10 /usr/bin/rsync --no-detach --daemon --config ${RSYNC_SERVER_CONF_PATH} -v
 
 EOF
     chmod +x /etc/service/rsync_server/run
